@@ -1,0 +1,14 @@
+[[package]]
+name = "aoc2018"
+version = "0.1.0"
+dependencies = [
+ "lapp 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)",
+]
+
+[[package]]
+name = "lapp"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+
+[metadata]
+"checksum lapp 0.3.1 (registry+https://github.com/rust-lang/crates.io-index)" = "44758669f6f88b6dddac3f833f234d5128530108b5738932a166eb69660faea8"
