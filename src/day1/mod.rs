@@ -2,6 +2,7 @@ use std::fs::File;
 use std::fs;
 use std::io;
 use std::io::prelude::*;
+use std::io::BufReader;
 
 use aoc2018::Day;
 
@@ -13,24 +14,26 @@ pub fn load(days_array: &mut Vec<Day>) {
 	days_array.push(Day::new(DAY, run));
 }
 
-pub fn run(optional_input:String) {
+pub fn run(input: File) {
 	// Day 1 code.
-let mut input_filename = match optional_input.len() {
-            0 => {
-            	println!("using default");
-            	get_input_for_day(DAY)
-            },
-            _ => {
-            	println!("using provided input, {}", optional_input);
-            	optional_input
-            },
-        };
-    let input_file = fs::OpenOptions::new().read(true).write(false).create(false).open(input_filename);
-
-	// if optional_input.len() > 0 {
-	// 	// todo: implement parsing optional input
-	// } else {
-	// 	// load the default input file
-	// }
+    let mut reader = BufReader::new(input);
+    let mut accumulator = 0;
+    let mut operationCounter = 0;
+    for lineResult in reader.lines() {
+        if let Ok(mut line) = lineResult {
+            let operation = line.get(0..1).unwrap();
+            let value_string = line.get(1..).unwrap();
+            let value = value_string.parse::<i32>().unwrap();
+            match operation {
+                "+" => accumulator += value,
+                "-" => accumulator -= value,
+                _ => {
+                    println!("unknown operation, aborting");
+                    return;
+                },
+            }
+            operationCounter += 1;
+        }
+    }
+    println!("Result: {}, after {} operations", accumulator, operationCounter);
 }
-
