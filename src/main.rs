@@ -4,6 +4,7 @@ extern crate lapp;
 
 use aoc2018::Config;
 use aoc2018::Day;
+use aoc2018::get_input_file;
 
 use std::process;
 // use std::env;
@@ -52,7 +53,7 @@ fn main() {
 	if config.all {
 		for day in days {
 			println!("Running day: {}", &day);
-			day.run(config.input.clone());
+			day.run(get_input_file(day.index, &config.input).unwrap());
 		}
 
 	} else {
@@ -60,7 +61,7 @@ fn main() {
 		if index < days.len() {
 			let day = &days[index];
 			println!("Running day: {}", &day);
-			day.run(config.input);
+			day.run(get_input_file(day.index, &config.input).unwrap());
 		} else {
 			println!("Invalid day selection: {}", config.day);
 		}

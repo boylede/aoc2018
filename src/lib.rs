@@ -1,5 +1,6 @@
 extern crate reqwest;
 
+use std::fs::File;
 use std::io::BufRead;
 use std::io::Write;
 use std::fmt;
@@ -42,15 +43,15 @@ impl Config {
 
 #[derive(Debug)]
 pub struct Day {
-	runner: fn(String),
-	index: i32,
+	runner: fn(File),
+	pub index: i32,
 }
 
 impl Day {
-	pub fn new(index: i32, runner: fn(String)) -> Self {
+	pub fn new(index: i32, runner: fn(File)) -> Self {
 		Day{runner, index}
 	}
-	pub fn run(self: &Self, input: String) {
+	pub fn run(self: &Self, input: File) {
 		(self.runner)(input);
 	}
 }
@@ -61,22 +62,32 @@ impl fmt::Display for Day {
 	}
 }
 
+pub fn get_input_file(day: i32, optional_input: &String) -> Result<File, std::io::Error> {
+	let input_filename = match optional_input.len() {
+        0 => {
+        	println!("Using default input");
+        	get_input_for_day(day)
+        },
+        _ => {
+        	println!("Using user-provided input, {}", optional_input);
+        	optional_input.clone()
+        },
+    };
+    fs::OpenOptions::new().read(true).write(false).create(false).open(input_filename)
+}
+
 
 pub fn get_input_for_day(day: i32) -> String {
-	let file_path = format!("input/day{}.input", day);
+	let file_path = format!("input/day{}.txt", day);
 	let file = fs::OpenOptions::new().read(true).write(false).create(false).open(&file_path);
-
+	let url = format!("https://adventofcode.com/2018/day/{}/input", day);
 	if let Err(_e) = file {
 		println!("Downloading inputs for this day.");
-		get_url_into_file("https://adventofcode.com/2018/day/1/input".to_string(), file_path);
+		get_url_into_file(url, &file_path);
 	} else {
-		println!("found input file");
+		println!("Found cached input file");
 	}
-	// Err(NotFound) => println!("couldnt find file"),
- //    Err(e) => panic!("Error while opening file:{}", e)
-
-    println!("loaded default file");
-	unimplemented!()
+    file_path
 }
 
 fn make_session_header() -> HeaderMap {
@@ -87,7 +98,6 @@ fn make_session_header() -> HeaderMap {
 	session_raw = session_raw.trim_end().to_string();
 	let mut headers = HeaderMap::new();
 	if len > 0 {
-		println!("using cookie: \n{}", &session_raw);
 		let name = HeaderName::from_lowercase(b"cookie").unwrap();
 		let value = match HeaderValue::from_str(session_raw.trim_end()) {
 			Ok(c) => c,
@@ -112,12 +122,12 @@ fn get_url(url:String) -> reqwest::Response {
     res
 }
 
-fn get_url_into_file(url: String,  filename: String) {
-    let mut request = get_url(url);
+fn get_url_into_file(url: String,  filename: &String) {
     let mut file = match fs::OpenOptions::new().read(true).write(true).create(true).open(filename) {
     	Ok(c) => c,
-        Err(e) => panic!("Error while opening file:{}", e)
+        Err(e) => panic!("Error while opening file \"{}\" for writing: {}", filename, e)
     };
+    let mut request = get_url(url);
     request.copy_to(&mut file).unwrap();
     file.flush().unwrap();
 }
