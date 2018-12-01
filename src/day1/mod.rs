@@ -13,7 +13,7 @@ pub fn load(days_array: &mut Vec<Day>) {
 	days_array.push(Day::new(DAY, run));
 }
 
-pub fn run(optional_input:Vec<String>) {
+pub fn run(optional_input:String) {
 	// Day 1 code.
 let mut input_filename = match optional_input.len() {
             0 => {

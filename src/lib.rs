@@ -10,36 +10,47 @@ use reqwest::header::{HeaderMap, HeaderValue, HeaderName};
 
 #[derive(Debug)]
 pub struct Config {
-	pub input: Vec<String>,
 	pub day: i32,
 	pub all: bool,
+	pub session: String,
+	pub input: String,
 }
 impl Config {
 	pub fn new(args: lapp::Args ) -> Result<Config, &'static str> {
-		let input = args.get_strings("input");
 
 		let all = args.get_bool("all");
 		let day = args.get_integer("day");
 
+		let session = match args.flag_present("session") {
+			true => args.get_string("session"),
+			false => "session not set in command line, TODO: get from file".to_string(),
+		};
+
+		let input = match args.flag_present("input") {
+			true => args.get_string("input"),
+			false => "".to_string(),
+		};
+
 		Ok(Config {
-			input,
 			all,
 			day,
+			session,
+			input,
 		})
 	}
 }
 
 #[derive(Debug)]
 pub struct Day {
-	runner: fn(Vec<String>),
+	runner: fn(String),
 	index: i32,
 }
 
 impl Day {
-	pub fn new(index: i32, runner: fn(Vec<String>)) -> Self {
+	pub fn new(index: i32, runner: fn(String)) -> Self {
 		Day{runner, index}
 	}
-	pub fn run(self: &Self, input: Vec<String>) {
+	pub fn run(self: &Self, input: String) {
 		(self.runner)(input);
 	}
 }

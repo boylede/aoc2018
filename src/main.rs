@@ -1,11 +1,12 @@
 extern crate aoc2018;
 extern crate lapp;
 
+
 use aoc2018::Config;
 use aoc2018::Day;
 
 use std::process;
-use std::env;
+// use std::env;
 
 mod day1;
 mod day2;
@@ -14,7 +15,8 @@ mod day2;
 const USAGE : &'static str = "Dan Boyle's Advent of Code 2018 entries.
 	-d, --day (default 1) which day's code to run.
 	-a, --all run all day modules currently present.
-	-i, --input... (string) optional input file.";
+	-i, --input (string) optional input file.
+	-s, --session (string) optional session string.";
 
 fn main() {
 /* 	Load all challenges into a Vec for easy running */
@@ -57,10 +59,10 @@ fn main() {
 		let index = (config.day - 1) as usize;
 		if index < days.len() {
 			let day = &days[index];
-			print!("Running day: {}", &day);
+			println!("Running day: {}", &day);
 			day.run(config.input);
 		} else {
-			print!("Invalid day selection: {}", config.day);
+			println!("Invalid day selection: {}", config.day);
 		}
 
 	} 
