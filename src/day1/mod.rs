@@ -58,9 +58,6 @@ fn part2(input: &File) {
     let mut accumulator = 0;
     let mut accumulated: Vec<i32> = vec!();
 
-    let mut operationCounter = 0;
-    let mut full_loops = 0;
-
     let mut lines_vec = vec!();
 
     let mut lines_it = reader.lines();
@@ -73,17 +70,16 @@ fn part2(input: &File) {
         value
     }).collect();
 
-    let lines_iterator = Infinite_iter::from_vec(&lines_values);
-    for line in lines_iterator {
-        accumulator += line;
-        operationCounter += 1;
+    let values_iterator = Infinite_iter::from_vec(&lines_values);
+    for value in values_iterator {
+        accumulator += value;
         if accumulated.contains(&accumulator) {
             println!("Found duplicate value {}", accumulator);
             break;
         }
         accumulated.push(accumulator);
     }
-    println!("Result: {}, after {} operations", accumulator, operationCounter);
+    println!("Result: {}, after {} operation", accumulator, accumulated.len());
 
 }
 
@@ -110,7 +106,7 @@ impl<'a, T> Iterator for Infinite_iter<'a, T> {
             self.pos = 0;
             self.loops += 1;
         }
-        if self.loops > 99999 {
+        if self.loops > 200 {
         	panic!("You may have screwed up somewhere.");
         }
         let out: Option<Self::Item> = self.inner.get(self.pos);
