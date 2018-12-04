@@ -1,7 +1,10 @@
+extern crate time;
+
 use std::fs::File;
 use std::fs;
 use std::io;
 use std::io::prelude::*;
+use std::io::{Read, SeekFrom, Seek};
 use std::io::BufReader;
 
 use aoc2018::Day;
@@ -14,8 +17,19 @@ pub fn load(days_array: &mut Vec<Day>) {
 	days_array.push(Day::new(DAY, run));
 }
 
-pub fn run(input: File) {
-	// Day 1 code.
+pub fn run(mut input: File) {
+    let a_time = time::precise_time_ns();
+    part1(&input);
+    let b_time = time::precise_time_ns();
+    input.seek(SeekFrom::Start(0 as u64));
+    part2(&input);
+    let c_time = time::precise_time_ns();
+    println!("Day 1 Part 1 took: {}ns", b_time - a_time);
+    println!("Day 1 Part 2 took: {}ns", c_time - b_time);
+}
+
+fn part1(input: &File) {
+	println!("Running Part 1");
     let mut reader = BufReader::new(input);
     let mut accumulator = 0;
     let mut operationCounter = 0;
@@ -36,4 +50,71 @@ pub fn run(input: File) {
         }
     }
     println!("Result: {}, after {} operations", accumulator, operationCounter);
+}
+
+fn part2(input: &File) {
+    println!("Running Part 2");
+    let mut reader = BufReader::new(input);
+    let mut accumulator = 0;
+    let mut accumulated: Vec<i32> = vec!();
+
+    let mut operationCounter = 0;
+    let mut full_loops = 0;
+
+    let mut lines_vec = vec!();
+
+    let mut lines_it = reader.lines();
+    while let Some(Ok(line)) = lines_it.next() {
+        lines_vec.push(line);
+    }
+
+    let mut lines_values: Vec<i32> = lines_vec.iter().map(|line| {
+        let value = line.parse::<i32>().unwrap();
+        value
+    }).collect();
+
+    let lines_iterator = Infinite_iter::from_vec(&lines_values);
+    for line in lines_iterator {
+        accumulator += line;
+        operationCounter += 1;
+        if accumulated.contains(&accumulator) {
+            println!("Found duplicate value {}", accumulator);
+            break;
+        }
+        accumulated.push(accumulator);
+    }
+    println!("Result: {}, after {} operations", accumulator, operationCounter);
+
+}
+
+struct Infinite_iter<'a, T: 'a> {
+    inner: &'a Vec<T>,
+    pos: usize,
+    loops: usize,
+}
+
+impl <'a, T> Infinite_iter<'a, T> {
+    fn from_vec(vector: &'a Vec<T>) -> Self {
+        Self {
+            inner: vector,
+            pos: 0,
+            loops: 0,
+        }
+    }
+}
+
+impl<'a, T> Iterator for Infinite_iter<'a, T> {
+    type Item = &'a T;
+    fn next(&mut self) -> Option<Self::Item> {
+        if self.pos >= self.inner.len() {
+            self.pos = 0;
+            self.loops += 1;
+        }
+        if self.loops > 99999 {
+        	panic!("You may have screwed up somewhere.");
+        }
+        let out: Option<Self::Item> = self.inner.get(self.pos);
+        self.pos += 1;
+        out
+    }
 }
