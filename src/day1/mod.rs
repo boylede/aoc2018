@@ -4,6 +4,7 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::{SeekFrom, Seek};
 use std::io::BufReader;
+use std::collections::HashSet;
 
 use aoc2018::Day;
 
@@ -13,69 +14,61 @@ pub fn load(days_array: &mut Vec<Day>) {
 	days_array.push(Day::new(DAY, run));
 }
 
-pub fn run(mut input: File) {
+pub fn run(input: File) {
     let a_time = time::precise_time_ns();
-    part1(&input);
-    let b_time = time::precise_time_ns();
-    input.seek(SeekFrom::Start(0 as u64)).unwrap();
-    part2(&input);
-    let c_time = time::precise_time_ns();
-    println!("Day 1 Part 1 took: {}ns", b_time - a_time);
-    println!("Day 1 Part 2 took: {}ns", c_time - b_time);
-}
-
-fn part1(input: &File) {
-	println!("Running Part 1");
-    let reader = BufReader::new(input);
-    let mut accumulator = 0;
-    let mut operation_counter = 0;
-    for line_result in reader.lines() {
-        if let Ok(mut line) = line_result {
-            let operation = line.get(0..1).unwrap();
-            let value_string = line.get(1..).unwrap();
-            let value = value_string.parse::<i32>().unwrap();
-            match operation {
-                "+" => accumulator += value,
-                "-" => accumulator -= value,
-                _ => {
-                    println!("unknown operation, aborting");
-                    return;
-                },
-            }
-            operation_counter += 1;
+    println!("loading day {} input.", DAY);
+    
+    let mut lines = vec!();
+    {
+        let mut lines_iterator = BufReader::new(&input).lines();
+        while let Some(Ok(line)) = lines_iterator.next() {
+            lines.push(line);
         }
     }
-    println!("Result: {}, after {} operations", accumulator, operation_counter);
+    let b_time = time::precise_time_ns();
+    println!("Loading took: {}ns", b_time - a_time);
+    post_load(lines);
+
 }
 
-fn part2(input: &File) {
-    println!("Running Part 2");
-    let reader = BufReader::new(input);
-    let mut accumulator = 0;
-    let mut accumulated: Vec<i32> = vec!();
+fn post_load(lines: Vec<String>) {
+    let a_time = time::precise_time_ns();
+    part1(&lines);
+    let b_time = time::precise_time_ns();
+    part2(&lines);
+    let c_time = time::precise_time_ns();
+    println!("Day {} Part 1 took: {}ns", DAY, b_time - a_time);
+    println!("Day {} Part 2 took: {}ns", DAY, c_time - b_time);
 
-    let mut lines_vec = vec!();
+}
 
-    let mut lines_it = reader.lines();
-    while let Some(Ok(line)) = lines_it.next() {
-        lines_vec.push(line);
-    }
+fn part1(lines: &Vec<String>) {
+    let value = lines.iter().map(|line| {
+        line.parse::<i32>().unwrap()
+    }).fold(0, |acc, value|{
+        acc + value
+    });
+    println!("Part 1 Result: {}", value);
+}
 
-    let lines_values: Vec<i32> = lines_vec.iter().map(|line| {
-        let value = line.parse::<i32>().unwrap();
-        value
+fn part2(lines: &Vec<String>) {
+    let values : Vec<i32> = lines.iter().map(|line| {
+        line.parse::<i32>().unwrap()
     }).collect();
+    let values_iterator = InfiniteIter::from_vec(&values);
 
-    let values_iterator = InfiniteIter::from_vec(&lines_values);
+    let mut accumulator = 0;
+    let mut accumulated: HashSet<i32> = HashSet::new();
+
     for value in values_iterator {
         accumulator += value;
         if accumulated.contains(&accumulator) {
             println!("Found duplicate value {}", accumulator);
             break;
         }
-        accumulated.push(accumulator);
+        accumulated.insert(accumulator);
     }
-    println!("Result: {}, after {} operation", accumulator, accumulated.len());
+    println!("Part 2 Result: {}", accumulator);
 
 }
 
