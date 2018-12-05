@@ -2,14 +2,11 @@ extern crate time;
 
 use std::fs::File;
 use std::fs;
-use std::io;
 use std::io::prelude::*;
-use std::io::{Read, SeekFrom, Seek};
+use std::io::{SeekFrom, Seek};
 use std::io::BufReader;
 
 use aoc2018::Day;
-
-use aoc2018::get_input_for_day;
 
 const DAY: i32 = 1;
 
