@@ -12,6 +12,7 @@ use std::process;
 mod day1;
 mod day2;
 mod day3;
+mod day4;
 
 
 const USAGE : &'static str = "Dan Boyle's Advent of Code 2018 entries.
@@ -27,6 +28,7 @@ fn main() {
 	day1::load(&mut days);
 	day2::load(&mut days);
 	day3::load(&mut days);
+	day4::load(&mut days);
 
 /* 	Debug Prints */
 	let mut debug_text = String::new();
