@@ -5,6 +5,7 @@ use std::io::prelude::*;
 use std::io::BufReader;
 
 use std::collections::HashMap;
+use std::collections::HashSet;
 
 use aoc2018::Day;
 
@@ -63,31 +64,47 @@ fn part1(lines: &Vec<String>) {
 	println!("found total number of areas with multiple claims: {}", shared);
 }
 
+enum occupation {
+	Unoccupied,
+	Occupied(i32),
+}
+
 fn part2(lines: &Vec<String>) {
-	let mut cloth : HashMap<Square, Vec<i32>>= HashMap::new();
-	let mut claim_list : HashMap<i32, Claim> = HashMap::new();
+	let mut cloth : HashMap<Square, occupation>= HashMap::new();
+	let mut claim_set : HashSet<i32> = HashSet::new();
 
 	for line in lines {
 		let claim = load_claim(line);
-		
+		let id = claim.id;
 		let squares = get_claim_squares(&claim);
+		let mut occupied = false;
 		for square in squares {
-			let mut claims : &mut Vec<i32> = cloth.entry(square).or_insert(Vec::new());
-			claims.push(claim.id);
+			let prior_claims = cloth.insert(square.clone(), occupation::Occupied(id));
+			if let Some(prior_claim) = prior_claims {
+				if let occupation::Occupied(prior_id) = prior_claim {
+					claim_set.remove(&prior_id);
+					claim_set.remove(&id);
+					occupied = true;
+				}
+			}
+			// let mut claims : &mut Vec<i32> = cloth.entry(square).or_insert(occupation::Occupied(id));
+			// claims.push(id);
 		}
-		claim_list.insert(claim.id, claim);
+		if !occupied {
+			claim_set.insert(id);
+		}
 	}
 
-	for (_, claims) in cloth {
-		if claims.len() >= 2 {
-			for claim in claims {
-				claim_list.remove(&claim);
-			}
-		}
-	}
-	let free_claims = claim_list.len();
+	// for (_, claims) in cloth {
+	// 	if claims.len() >= 2 {
+	// 		for claim in claims {
+	// 			claim_set.remove(&claim);
+	// 		}
+	// 	}
+	// }
+	let free_claims = claim_set.len();
 	println!("We found {} claims without conflicts:", free_claims);
-	for claim in claim_list.values() {
+	for claim in claim_set {
 		println!("{}", claim);
 	}
 }
@@ -161,7 +178,7 @@ impl Display for Claim {
 	}
 }
 
-#[derive(PartialEq, Eq, Hash)]
+#[derive(PartialEq, Eq, Hash, Clone)]
 struct Square {
 	x: i32,
 	y: i32,
