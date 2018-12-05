@@ -1,3 +1,5 @@
+use std::fmt::Formatter;
+use std::fmt::Display;
 use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
@@ -40,8 +42,140 @@ fn post_load(lines: Vec<String>) {
 
 }
 fn part1(lines: &Vec<String>) {
+	let mut cloth : HashMap<Square, i32>= HashMap::new();
+	for line in lines {
+		let claim = load_claim(line);
+		// println!("C:{}", claim);
+		let squares = get_claim_squares(&claim);
+		for square in squares {
+			let claims = cloth.entry(square).or_insert(0);
+			*claims += 1;
+		}
+	}
 
+	let shared = cloth.values().fold(0, |acc, x| {
+		let mut res = acc;
+		if *x >= 2 {
+			res += 1;
+		}
+		res
+	});
+	println!("found total number of areas with multiple claims: {}", shared);
 }
-fn part2(lines: &Vec<String>) {
 
+fn part2(lines: &Vec<String>) {
+	let mut cloth : HashMap<Square, Vec<i32>>= HashMap::new();
+	let mut claim_list : HashMap<i32, Claim> = HashMap::new();
+
+	for line in lines {
+		let claim = load_claim(line);
+		
+		let squares = get_claim_squares(&claim);
+		for square in squares {
+			let mut claims : &mut Vec<i32> = cloth.entry(square).or_insert(Vec::new());
+			claims.push(claim.id);
+		}
+		claim_list.insert(claim.id, claim);
+	}
+
+	for (_, claims) in cloth {
+		if claims.len() >= 2 {
+			for claim in claims {
+				claim_list.remove(&claim);
+			}
+		}
+	}
+	let free_claims = claim_list.len();
+	println!("We found {} claims without conflicts:", free_claims);
+	for claim in claim_list.values() {
+		println!("{}", claim);
+	}
+}
+
+fn load_claim(line: &String) -> Claim {
+	let mut my_claim = Claim{
+		id: 0,
+		left: 0,
+		top: 0,
+		width: 0,
+		height: 0,
+	};
+	for (i, chunk) in line.split_whitespace().enumerate() {
+		match i {
+			0 => {
+				//#ID
+				let (_, chunk) = chunk.split_at(1);
+				// println!("found id: {}", chunk);
+				let id = chunk.parse::<i32>().unwrap();
+				// println!("found id: {}", id);
+				my_claim.id = id;
+			},
+			1 => {
+				//Symbol @
+			},
+			2 => {
+				//left,top:
+				let mut parts :Vec<&str>= chunk.split(',').collect();
+				let top = parts.pop().unwrap();
+				let (top, _) = top.split_at(top.len() - 1);
+				let left = parts.pop().unwrap();
+
+				my_claim.top = top.parse::<i32>().unwrap();
+				my_claim.left = left.parse::<i32>().unwrap();
+
+			},
+			3 => {
+				//widthxheight
+				let mut parts :Vec<&str>= chunk.split('x').collect();
+				let height = parts.pop().unwrap();
+				let width = parts.pop().unwrap();
+
+				my_claim.height = height.parse::<i32>().unwrap();
+				my_claim.width = width.parse::<i32>().unwrap();
+			},
+			_ => {
+				// unexpected.
+			}
+		}
+	}
+	my_claim
+}
+
+struct Claim {
+	id: i32,
+	left: i32,
+	top: i32,
+	width: i32,
+	height: i32,
+}
+
+impl Display for Claim {
+	fn fmt(&self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
+		write!(f, "#{} @ {},{}: {}x{}\n",
+			self.id,
+			self.left,
+			self.top,
+			self.width,
+			self.height
+			)
+	}
+}
+
+#[derive(PartialEq, Eq, Hash)]
+struct Square {
+	x: i32,
+	y: i32,
+}
+
+fn get_claim_squares(claim: &Claim) -> Vec<Square> {
+	let mut squares : Vec<Square> = vec!();
+	for x in 0..claim.width {
+		for y in 0..claim.height {
+			squares.push(Square{
+				x: x + claim.left,
+				y: y + claim.top,
+			});
+		}
+	}
+	squares
 }
