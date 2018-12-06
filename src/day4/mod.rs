@@ -44,37 +44,30 @@ fn post_load(lines: Vec<String>) {
 
 }
 fn part1(lines: &Vec<String>) {
-
-	// let line = lines.get(0).unwrap();
-	// let tokens :Vec<&str> = line.split(|c| {
-	// 	c == '[' ||
-	// 	c == ']' ||
-	// 	c == '-' ||
-	// 	c == ' ' ||
-	// 	c == ':' ||
-	// 	c == '#'
-	// }).collect();
-	// println!("found: {}, wanted: {}", tokens.len(), tokens.get(5).unwrap());
-
 	let records = lines.iter().map(|line| line.parse::<Record>().unwrap());
 	println!("found {} records", records.len());
 
-	// {
-	// 	let early_release = records.clone().collect::<Vec<Record>>();
-	// 	let first : &Record = early_release.get(0).unwrap();
-	// 	println!("for example, the first one is: {}", first);
-	// }
-
-	for record in records {
+	let mut records = records.collect::<Vec<Record>>();
+	records.sort();
+	let mut last_guard_id: i32 = 0;
+	for mut record in records.iter_mut() {
+		// println!("{}", record);
+		if let Guard::Guard(id) = record.guard {
+			last_guard_id = id;
+		} else {
+			record.guard = Guard::Guard(last_guard_id);
+		}
+	}
+	for record in records.iter() {
 		println!("{}", record);
 	}
-	// todo: sort records
 
 }
 fn part2(lines: &Vec<String>) {
 
 }
 
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
 enum Activity {
 	BeginShift,
 	FallAsleep,
@@ -82,12 +75,17 @@ enum Activity {
 	Placeholder,
 }
 
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
 struct Record {
+	year: i32,
+	month: i32,
+	day: i32,
+	hour: i32,
 	minute: i32,
 	guard: Guard,
 	activity: Activity,
 }
-
+#[derive(Ord, PartialOrd, Eq, PartialEq)]
 enum Guard {
 	Placeholder,
 	Guard(i32),
@@ -119,36 +117,35 @@ impl FromStr for Record {
 			c == '#'
 		}).collect();
 
+
+		let year = tokens.get(1).unwrap().parse::<i32>()?;
+		let month = tokens.get(2).unwrap().parse::<i32>()?;
+		let day = tokens.get(3).unwrap().parse::<i32>()?;
+		let hour = tokens.get(4).unwrap().parse::<i32>()?;
 		let minute = tokens.get(5).unwrap().parse::<i32>()?;
+
 		let mut guard = Guard::Placeholder;
 		let mut activity = Activity::Placeholder;
+		// if there is a nineth token, this is a guard begin shift record
 		if let Some(token) = tokens.get(9) {
-			// println!("{}", &token);
 			if let Ok(guard_id) = token.parse::<i32>() {
 				guard = Guard::Guard(guard_id);
 				activity = Activity::BeginShift;
 			} 
-			// else {
-			// 	let token = tokens.get(7).unwrap();
-			// 	println!("{}", &token);
-			// 	activity = match token {
-			// 		&"" => Activity::BeginShift, // should not happen?
-			// 		&"asleep" => Activity::FallAsleep,
-			// 		&"up" => Activity::WakeUp,
-			// 		&&_ => return Err(ParseRecordError::NoActivity(token.to_string())),
-			// 	}
-			// }
 		} else {
+			// otherwise, its either falling asleep or waking up
 			let token = tokens.get(8).unwrap();
-			// println!("{}", &token);
 			activity = match token {
-				&"" => Activity::BeginShift, // should not happen?
 				&"asleep" => Activity::FallAsleep,
 				&"up" => Activity::WakeUp,
 				&&_ => return Err(ParseRecordError::NoActivity(token.to_string())),
 			}
 		};
 		Ok(Record {
+			year,
+			month,
+			day,
+			hour,
 			minute,
 			guard,
 			activity
@@ -163,13 +160,17 @@ impl Display for Record {
 			Guard::NoGuard => String::from("Unknown Guard"),
 			Guard::Guard(id) => format!("{}", id),
 		};
-		write!(f, "@{} #{} {}",
+		write!(f, "[{}-{}-{} {}:{}] Guard #{} {}",
+			self.year,
+			self.month,
+			self.day,
+			self.hour,
 			self.minute,
 			guard,
 			match self.activity {
-				Activity::BeginShift => "Started Shift",
-				Activity::WakeUp => "Woke Up",
-				Activity::FallAsleep => "Fell Asleep",
+				Activity::BeginShift => "begins shift",
+				Activity::WakeUp => "wakes up",
+				Activity::FallAsleep => "falls asleep",
 				Activity::Placeholder => "??",
 		})
 	}
