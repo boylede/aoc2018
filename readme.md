@@ -18,3 +18,7 @@ Part Two - 5ms
 Part One - 74ms
 
 Part Two - 68ms
+
+**Day Four**
+
+Part One - 50ms

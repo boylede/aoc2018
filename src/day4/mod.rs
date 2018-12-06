@@ -6,6 +6,8 @@ use std::str::FromStr;
 use std::convert::From;
 use std::fmt::Formatter;
 use std::fmt::Display;
+use std::collections::HashMap;
+use std::collections::hash_map::Entry;
 
 use aoc2018::Day;
 
@@ -58,16 +60,104 @@ fn part1(lines: &Vec<String>) {
 			record.guard = Guard::Guard(last_guard_id);
 		}
 	}
-	for record in records.iter() {
-		println!("{}", record);
-	}
 
+	let grouped_records = records.split(|record| {
+		record.activity == Activity::BeginShift
+	}).filter(|record_slice| {
+		record_slice.len() > 0
+	}).filter(|x|{
+		// println!("{:?}", x);
+		true
+	}).collect::<Vec<&[Record]>>();
+
+	// let 
+
+	println!("found {} days worth of midnight shifts", grouped_records.len());
+
+	let mut days :Vec<Shift>= vec!();
+	let mut guards :HashMap<i32, i32> = HashMap::new();
+	for day in grouped_records {
+		let mut shift = Shift::new();
+		let mut state = Status::Awake;
+		let mut activities = day.iter();
+		let mut next_activity = activities.next().unwrap(); // there is atleast 1 activity
+		if let Guard::Guard(id) = next_activity.guard {
+			 shift.guard = id;
+		};
+		shift.month = next_activity.month;
+		shift.day = next_activity.day;
+		// let next_minute = 
+		let mut minutes = [Status::Awake; 60];
+		for minute in 0..59 {
+			if minute == next_activity.minute {
+				state = match next_activity.activity {
+					Activity::WakeUp => Status::Awake,
+					Activity::FallAsleep => Status::Asleep,
+					_ => panic!("input had invalid activity"),
+				};
+				if let Some(activity) = activities.next() {
+					next_activity = activity;
+				};
+			}
+			minutes[minute as usize] = state;
+			if state == Status::Asleep {
+				let nap_timer = guards.entry(shift.guard).or_insert(0);
+				*nap_timer += 1;
+			}
+		}
+		shift.minutes = minutes;
+		// println!("{} = {}", shift, match guards.entry(shift.guard){
+		// 	Entry::Occupied(entry) => *entry.get(),
+		// 	_ => 0,
+		// });
+		println!("{}", shift);
+		days.push(shift);
+	}
+	for (guard_id, nap_length) in guards.iter() {
+		// let entry = match guards.entry(guard_id) {
+		// 	Entry::Occupied(e) => *e.get(),
+		// 	_ => 0,
+		// };
+		println!("Guard:{}, naps for {} minutes", guard_id, nap_length);
+	}
+	let (dumbo, longest_nap) = guards.iter().fold((0, 0), | (worst_guard, slept_for), (guard_id, nap_time) | {
+		let mut current_guard: i32 = *guard_id;
+		let mut current_nap_time: i32 = *nap_time;
+		if current_nap_time < slept_for {
+			current_guard = worst_guard;
+			current_nap_time = slept_for;
+		}
+		(current_guard, current_nap_time)
+	});
+	
+
+	let my_minutes : Vec<[Status; 60]>= days.iter().filter(|shift| shift.guard == dumbo).map(|shift| shift.minutes).collect();
+	let total_sleep_per_minute = my_minutes.iter().fold([0;60], |total_minutes, shift_minutes| {
+		let mut sum_minutes : [i32; 60] = total_minutes;
+		for minute in 0..59 {
+			if shift_minutes[minute as usize] == Status::Asleep {
+				sum_minutes[minute as usize] += 1;
+			}
+		}
+		sum_minutes
+	});
+	let mut nappiest_minute :i32 = 0;
+	let mut sleep_during_nappiest_minute = 0;
+	for minute in 0..59 {
+		if total_sleep_per_minute[minute] > sleep_during_nappiest_minute {
+			nappiest_minute = minute as i32;
+			sleep_during_nappiest_minute = total_sleep_per_minute[minute];
+		}
+	}
+	println!("The worst guard is #{}, they slept for {} minutes, but thier favourite minute to sleep was 00:{}, during which they slept on {} shifts.", dumbo, longest_nap, nappiest_minute, sleep_during_nappiest_minute);
+	let answer = dumbo * nappiest_minute;
+	println!("The answer was {}", answer);
 }
 fn part2(lines: &Vec<String>) {
 
 }
 
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Debug)]
 enum Activity {
 	BeginShift,
 	FallAsleep,
@@ -75,7 +165,7 @@ enum Activity {
 	Placeholder,
 }
 
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Debug)]
 struct Record {
 	year: i32,
 	month: i32,
@@ -85,7 +175,7 @@ struct Record {
 	guard: Guard,
 	activity: Activity,
 }
-#[derive(Ord, PartialOrd, Eq, PartialEq)]
+#[derive(Ord, PartialOrd, Eq, PartialEq, Debug)]
 enum Guard {
 	Placeholder,
 	Guard(i32),
@@ -175,3 +265,53 @@ impl Display for Record {
 		})
 	}
 }
+
+// #[derive(Default)]
+struct Shift {
+	month: i32,
+	day: i32,
+	guard: i32,
+	minutes: [Status; 60],
+}
+
+
+impl Shift {
+	fn new() -> Self {
+		Self {
+			month: 0,
+			day: 0,
+			guard: 0,
+			minutes: [Status::Awake; 60],
+		}
+	}
+}
+
+impl Display for Shift {
+	fn fmt(&self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
+		let mut minutes = String::new();
+		for minute in self.minutes.iter() {
+			minutes.push(match minute {
+				Status::Awake => '.',
+				Status::Asleep => '#',
+			});
+		}
+		write!(f, "{}-{}\t#{}\t{}",
+			self.month,
+			self.day,
+			self.guard,
+			minutes
+		)
+	}
+}
+
+#[derive(Copy, Clone, PartialEq)]
+enum Status {
+	Asleep,
+	Awake,
+}
+
+// impl Default for Status {
+// 	fn default() -> Status {
+// 		Status::Awake
+// 	}
+// }
