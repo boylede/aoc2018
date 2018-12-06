@@ -46,7 +46,6 @@ fn part1(lines: &Vec<String>) {
 	let mut cloth : HashMap<Square, i32>= HashMap::new();
 	for line in lines {
 		let claim = load_claim(line);
-		// println!("C:{}", claim);
 		let squares = get_claim_squares(&claim);
 		for square in squares {
 			let claims = cloth.entry(square).or_insert(0);
@@ -87,21 +86,11 @@ fn part2(lines: &Vec<String>) {
 					occupied = true;
 				}
 			}
-			// let mut claims : &mut Vec<i32> = cloth.entry(square).or_insert(occupation::Occupied(id));
-			// claims.push(id);
 		}
 		if !occupied {
 			claim_set.insert(id);
 		}
 	}
-
-	// for (_, claims) in cloth {
-	// 	if claims.len() >= 2 {
-	// 		for claim in claims {
-	// 			claim_set.remove(&claim);
-	// 		}
-	// 	}
-	// }
 	let free_claims = claim_set.len();
 	println!("We found {} claims without conflicts:", free_claims);
 	for claim in claim_set {
