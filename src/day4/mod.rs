@@ -61,14 +61,10 @@ fn part1(lines: &Vec<String>) {
 		}
 	}
 
-	let grouped_records = records.split(|record| {
-		record.activity == Activity::BeginShift
-	}).filter(|record_slice| {
-		record_slice.len() > 0
-	}).filter(|x|{
-		// println!("{:?}", x);
-		true
-	}).collect::<Vec<&[Record]>>();
+	let grouped_records :Vec<&[Record]>= records
+		.split(|record| record.activity == Activity::BeginShift)
+		.filter(|record_slice| record_slice.len() > 0)
+		.collect(); // ::<Vec<&[Record]>>
 
 	// let 
 
