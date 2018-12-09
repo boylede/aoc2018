@@ -7,7 +7,6 @@ use std::convert::From;
 use std::fmt::Formatter;
 use std::fmt::Display;
 use std::collections::HashMap;
-use std::collections::hash_map::Entry;
 
 use aoc2018::Day;
 
@@ -243,7 +242,7 @@ struct Record {
 enum Guard {
 	Placeholder,
 	Guard(i32),
-	NoGuard,
+	// NoGuard,
 }
 
 #[derive(Debug)]
@@ -311,7 +310,7 @@ impl Display for Record {
 	fn fmt(&self, f: &mut Formatter) -> Result<(), std::fmt::Error> {
 		let guard = match self.guard {
 			Guard::Placeholder => String::from("Placeholder"),
-			Guard::NoGuard => String::from("Unknown Guard"),
+			// Guard::NoGuard => String::from("Unknown Guard"),
 			Guard::Guard(id) => format!("{}", id),
 		};
 		write!(f, "[{}-{}-{} {}:{}] Guard #{} {}",
@@ -372,9 +371,4 @@ impl Display for Shift {
 enum Status {
 	Asleep,
 	Awake,
-}
-
-struct GuardSleepMonitor {
-	guard: i32,
-	minutes: [i32; 60],
 }

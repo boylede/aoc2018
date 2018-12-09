@@ -2,7 +2,6 @@ extern crate time;
 
 use std::fs::File;
 use std::io::prelude::*;
-use std::io::{SeekFrom, Seek};
 use std::io::BufReader;
 use std::collections::HashSet;
 

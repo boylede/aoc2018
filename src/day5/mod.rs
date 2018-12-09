@@ -2,7 +2,6 @@ use std::fs::File;
 use std::io::prelude::*;
 use std::io::BufReader;
 use std::char;
-use std::slice;
 
 use aoc2018::Day;
 
@@ -49,7 +48,7 @@ fn part1(lines: &Vec<String>) {
 
 fn solve_polymer(line_ref: String) -> i32 {
 	let (mut reactions, mut polymer) = reduce_polymer(line_ref.clone());
-	while (reactions > 0) {
+	while reactions > 0 {
 		let (count, new_polymer) = reduce_polymer(polymer.clone());
 		reactions = count;
 		polymer = new_polymer;

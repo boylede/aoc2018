@@ -63,13 +63,13 @@ fn part1(lines: &Vec<String>) {
 	println!("found total number of areas with multiple claims: {}", shared);
 }
 
-enum occupation {
+enum Occupation {
 	Unoccupied,
 	Occupied(i32),
 }
 
 fn part2(lines: &Vec<String>) {
-	let mut cloth : HashMap<Square, occupation>= HashMap::new();
+	let mut cloth : HashMap<Square, Occupation>= HashMap::new();
 	let mut claim_set : HashSet<i32> = HashSet::new();
 
 	for line in lines {
@@ -78,9 +78,9 @@ fn part2(lines: &Vec<String>) {
 		let squares = get_claim_squares(&claim);
 		let mut occupied = false;
 		for square in squares {
-			let prior_claims = cloth.insert(square.clone(), occupation::Occupied(id));
+			let prior_claims = cloth.insert(square.clone(), Occupation::Occupied(id));
 			if let Some(prior_claim) = prior_claims {
-				if let occupation::Occupied(prior_id) = prior_claim {
+				if let Occupation::Occupied(prior_id) = prior_claim {
 					claim_set.remove(&prior_id);
 					claim_set.remove(&id);
 					occupied = true;
