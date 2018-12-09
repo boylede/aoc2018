@@ -31,3 +31,9 @@ Part One - 1,586ms
 
 Part Two - 40,723ms
 
+**Day Six**
+
+Part One - ms
+
+Part Two - ms
+
