@@ -24,3 +24,10 @@ Part Two - 68ms
 Part One - 16ms
 
 Part Two - 15ms
+
+**Day Five**
+
+Part One - 1,586ms
+
+Part Two - 40,723ms
+
