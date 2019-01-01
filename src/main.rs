@@ -15,8 +15,25 @@ mod day3;
 mod day4;
 mod day5;
 mod day6;
-
-
+mod day7;
+mod day8;
+mod day9;
+mod day10;
+mod day11;
+mod day12;
+mod day13;
+mod day14;
+mod day15;
+mod day16;
+mod day17;
+mod day18;
+mod day19;
+mod day20;
+mod day21;
+mod day22;
+mod day23;
+mod day24;
+mod day25;
 
 const USAGE : &'static str = "Dan Boyle's Advent of Code 2018 entries.
 	-d, --day (default 1) which day's code to run.
@@ -34,6 +51,25 @@ fn main() {
 	day4::load(&mut days);
 	day5::load(&mut days);
 	day6::load(&mut days);
+	day7::load(&mut days);
+	day8::load(&mut days);
+	day9::load(&mut days);
+	day10::load(&mut days);
+	day11::load(&mut days);
+	day12::load(&mut days);
+	day13::load(&mut days);
+	day14::load(&mut days);
+	day15::load(&mut days);
+	day16::load(&mut days);
+	day17::load(&mut days);
+	day18::load(&mut days);
+	day19::load(&mut days);
+	day20::load(&mut days);
+	day21::load(&mut days);
+	day22::load(&mut days);
+	day23::load(&mut days);
+	day24::load(&mut days);
+	day25::load(&mut days);
 
 /* 	Debug Prints */
 	let mut debug_text = String::new();
