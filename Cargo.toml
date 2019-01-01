@@ -7,3 +7,4 @@ authors = ["Daniel Boyle <boylede@gmail.com>"]
 lapp = "0.3.0"
 reqwest = "0.9.1"
 time = "0.1.40"
+select = "0.4.2"
