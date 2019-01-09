@@ -50,4 +50,24 @@ fn part2(lines: &Vec<String>) {
 
 }
 
+#[derive(Debug)]
+struct Point4d {
+	x: i32,
+	y: i32,
+	z: i32,
+	t: i32,
+}
 
+impl Point4d {
+	fn minus(&self, b: &Point4d) -> i32 {
+		distance(self.x, b.x) + distance(self.y, b.y) + distance(self.t, b.t) + distance(self.t, b.t)
+	}
+}
+
+fn distance(a: i32, b: i32) -> i32{
+	if a - b > 0 {
+		a - b
+	} else {
+		b - a
+	}
+}
